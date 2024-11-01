@@ -6,7 +6,7 @@
 #3) Salida de comprobantes por pantalla.
 # 4) Altas, bajas y modificaciones de proveedores.
 
-#import sys
+import sys
 # from models.autenticacion import Autenticacion
 # from models.proveedores import GestorProveedores #importa la clase GestorProveedores del modulo proveedores
 # from models.productos import GestorProductos #importa la clase GestorProductos del modulo productos
@@ -113,10 +113,24 @@ class GestorProveedores:   #clase que gestiona los proveedores alta, baja y modi
 
 class Autenticacion:
     def __init__(self):
-        self.usuarios = {"admin": {"contraseña": "admin", "rol": "Administrador"},
-                         "gerente": {"contraseña": "gerente", "rol": "Gerente"},
-                         "operador": {"contraseña": "operador", "rol": "Operador"},
-                         "empleado": {"contraseña": "empleado", "rol": "Empleado"}}
+        self.usuarios = {
+            "admin": {
+                "contraseña": "admin", 
+                "rol": "Administrador"
+            },
+            "gerente": {
+                "contraseña": "gerente", 
+                "rol": "Gerente"
+            },
+            "operador": {
+                "contraseña": "operador",
+                "rol": "Operador"
+            },
+            "empleado": {
+                "contraseña": "empleado", 
+                "rol": "Empleado"
+            }
+        }
 
     def iniciar_sesion(self):
         usuario = input("Usuario: ")
@@ -129,11 +143,11 @@ class Autenticacion:
             print("Acceso denegado.")
             return False
 
-    def verificar_acceso(self, rol_preciso):
-        if self.rol == rol_preciso or self.rol == "Administrador":
+    def verificar_acceso(self, roles_habilitados):
+        if self.rol == "Administrador" or self.rol in roles_habilitados:
             return True
         else:
-            print(f"Acceso denegado: Se requiere rol {rol_preciso}.")
+            print(f"Acceso denegado: Se requiere algun rol {roles_habilitados}.")
             return False
 
 class GestorProductos:  #clase que gestiona los productos alta, baja y modificacion
@@ -302,6 +316,9 @@ class SistemaControlProveedores:#clase principal del sistema que administra los 
         if not self.autenticacion.iniciar_sesion():#verifica si el usuario tiene acceso para gestionar los proveedores
             print("Acceso denegado.")
             return
+        if not self.autenticacion.verificar_acceso(['Operador', 'Gerente']):
+            print("Rol denegado.")
+            return
         # Implementar lógica para gestionar proveedores
         while True:
             print("\n--- Gestión de Proveedores ---")
@@ -325,6 +342,9 @@ class SistemaControlProveedores:#clase principal del sistema que administra los 
     def gestionar_productos(self):#metodo que gestiona los productos y llama a los metodos de los modulos correspondientes a cada opcion del menu productos Alta, Baja y Modificacion
         if not self.autenticacion.iniciar_sesion():
             print("Acceso denegado.")
+            return
+        if not self.autenticacion.verificar_acceso(['Operador', 'Gerente', 'Empleado']):
+            print("Rol denegado.")
             return
         # Implementar lógica para gestionar productos
         while True:
@@ -350,6 +370,9 @@ class SistemaControlProveedores:#clase principal del sistema que administra los 
         if not self.autenticacion.iniciar_sesion():
             print("Acceso denegado.")
             return
+        if not self.autenticacion.verificar_acceso(['Gerente']):
+            print("Rol denegado.")
+            return
         # Implementar lógica para generar comprobantes
         self.generador_comprobantes.generar_comprobante()
         #mostrar los comprobantes
@@ -362,6 +385,9 @@ class SistemaControlProveedores:#clase principal del sistema que administra los 
     def ajustar_precios_ipc(self):#metodo que ajusta los precios segun el IPC y llama al metodo del modulo correspondiente y verifica si el usuario tiene acceso para ajustar los precios
         if not self.autenticacion.iniciar_sesion():
             print("Acceso denegado.")
+            return
+        if not self.autenticacion.verificar_acceso(['Gerente']):
+            print("Rol denegado.")
             return
         # Implementar lógica para ajustar precios según IPC
         # self.calculador_ipc.ajustar_precios()   
